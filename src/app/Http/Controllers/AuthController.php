@@ -6,7 +6,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
-class AuthController extends Controller
+class AuthController
 {
     public function login()
     {
@@ -29,7 +29,10 @@ class AuthController extends Controller
             }
             $request->session()->regenerate();
 
-            return redirect()->route('dashboard');
+            if (Auth::user()->role === 'admin') {
+                return redirect()->route('admin.dashboard');
+            }
+            return redirect()->route('user.dashboard');
         }
 
         return back()->withErrors([

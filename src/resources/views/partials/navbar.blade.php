@@ -12,7 +12,8 @@
             @endguest
 
             @auth
-            <a href="{{ url('/dashboard') }}" class="mr-4 font-medium text-gray-600 hover:text-blue-600">Tableau de
+            <a href="{{ Auth::user()->role === 'admin' ? url('/admin/dashboard') : url('/user/dashboard') }}"
+                class="mr-4 font-medium text-gray-600 hover:text-blue-600">Tableau de
                 bord</a>
             <form action="{{ url('/logout') }}" method="POST" class="inline">
                 @csrf

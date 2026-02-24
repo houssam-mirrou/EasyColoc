@@ -54,9 +54,9 @@ class User extends Authenticatable
         return $this->hasMany(Colocation::class , 'owner_id');
     }
 
-    public function colocation()
+    public function colocations()
     {
-        return $this->belongsTo(Colocation::class)->withPivot('left_at')->withTimestamps();
+        return $this->belongsToMany(Colocation::class , 'colocation_user')->withPivot('left_at')->withTimestamps();
     }
 
     public function expenses()
@@ -67,6 +67,12 @@ class User extends Authenticatable
     public function payments()
     {
         return $this->hasMany(Payment::class , 'payer_id');
+    }
+
+    public function currentColocation()
+    {
+        return $this->colocations()->wherePivot('left_at', null)->first()
+            ?? $this->ownedColocations()->where('status', 'active')->first();
     }
 
 }
