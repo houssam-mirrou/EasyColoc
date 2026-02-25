@@ -4,54 +4,51 @@ namespace App\Http\Controllers;
 
 use App\Models\Colocation;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class CollocationsController
 {
     public function index()
     {
-        return view('colocations.index');
+        return view('pages.colocations.index');
     }
 
     public function create()
     {
-        return view('colocations.create');
+        return view('pages.colocations.create');
     }
 
     public function store(Request $request)
     {
         $request->validate([
             'name' => 'required',
-            'address' => 'required',
-            'city' => 'required',
-            'state' => 'required',
-            'zip' => 'required',
-            'country' => 'required',
         ]);
+        Colocation::create([
+            'name' => $request->name,
+            'owner_id' => Auth::user()->id,
+            'status' => 'active',
+        ]);
+        if (Auth::user()->role === 'user') {
+            return redirect()->route('user.dashboard')->with('success', 'Colocation créée avec succès');
+        }
 
-        $colocation = Colocation::create($request->all());
-
-        return redirect()->route('colocations.index');
+        return redirect()->route('admin.colocations.index')->with('success', 'Colocation créée avec succès');
     }
 
     public function show(Colocation $colocation)
     {
-        return view('colocations.show', compact('colocation'));
+        return view('pages.colocations.show', compact('colocation'));
     }
 
     public function edit(Colocation $colocation)
     {
-        return view('colocations.edit', compact('colocation'));
+        return view('pages.colocations.edit', compact('colocation'));
     }
 
     public function update(Request $request, Colocation $colocation)
     {
         $request->validate([
             'name' => 'required',
-            'address' => 'required',
-            'city' => 'required',
-            'state' => 'required',
-            'zip' => 'required',
-            'country' => 'required',
         ]);
 
         $colocation->update($request->all());
@@ -61,7 +58,9 @@ class CollocationsController
 
     public function destroy(Colocation $colocation)
     {
-        $colocation->delete();
+        $colocation->status = 'cancelled';
+        $colocation->cancelled_at = now();
+        $colocation->save();
 
         return redirect()->route('colocations.index');
     }
