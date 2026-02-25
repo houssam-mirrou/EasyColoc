@@ -2,7 +2,9 @@
 
 use App\Http\Controllers\admin\AdminDashboardController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\BalenceController;
 use App\Http\Controllers\CollocationsController;
+use App\Http\Controllers\ExpensesController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\InvitationController;
 use App\Http\Controllers\user\UserDashboardController;
@@ -19,3 +21,5 @@ Route::get('/admin/dashboard', [AdminDashboardController::class , 'index'])->nam
 Route::get('/home', [HomeController::class , 'index'])->name('home');
 Route::resource('colocations', CollocationsController::class);
 Route::get('invitations', [InvitationController::class , 'accept'])->name('invitations.accept');
+Route::resource('expenses', ExpensesController::class);
+Route::resource('balances', BalenceController::class);
