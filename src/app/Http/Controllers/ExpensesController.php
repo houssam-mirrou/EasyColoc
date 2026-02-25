@@ -11,7 +11,7 @@ class ExpensesController
      */
     public function index()
     {
-        //
+    //
     }
 
     /**
@@ -19,7 +19,7 @@ class ExpensesController
      */
     public function create()
     {
-        //
+        return view('pages.expences.create');
     }
 
     /**
@@ -27,7 +27,7 @@ class ExpensesController
      */
     public function store(Request $request)
     {
-        //
+    //
     }
 
     /**
@@ -35,7 +35,7 @@ class ExpensesController
      */
     public function show(string $id)
     {
-        //
+    //
     }
 
     /**
@@ -43,7 +43,7 @@ class ExpensesController
      */
     public function edit(string $id)
     {
-        //
+    //
     }
 
     /**
@@ -51,7 +51,7 @@ class ExpensesController
      */
     public function update(Request $request, string $id)
     {
-        //
+    //
     }
 
     /**
@@ -59,6 +59,6 @@ class ExpensesController
      */
     public function destroy(string $id)
     {
-        //
+    //
     }
 }

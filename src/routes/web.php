@@ -23,3 +23,5 @@ Route::resource('colocations', CollocationsController::class);
 Route::get('invitations', [InvitationController::class , 'accept'])->name('invitations.accept');
 Route::resource('expenses', ExpensesController::class);
 Route::resource('balances', BalenceController::class);
+Route::get('/colocations/{id}/settings', [CollocationsController::class , 'settings'])->name('colocations.settings');
+Route::post('/colocations/{id}/category-settings', [CollocationsController::class , 'category_settings'])->name('colocations.category_settings');

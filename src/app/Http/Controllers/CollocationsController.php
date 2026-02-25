@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Category;
 use App\Models\Colocation;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -63,5 +64,23 @@ class CollocationsController
         $colocation->save();
 
         return redirect()->route('colocations.index');
+    }
+
+    public function settings()
+    {
+        $colocation = Auth::user()->currentColocation();
+        return view('pages.colocations.settings', compact('colocation'));
+    }
+
+    public function category_settings(Request $request)
+    {
+        $request->validate([
+            'name' => 'required|string|min:4',
+        ]);
+        Category::create([
+            'name' => $request->name,
+            'colocation_id' => Auth::user()->currentColocation()->id,
+        ]);
+        return redirect()->route('colocations.settings');
     }
 }

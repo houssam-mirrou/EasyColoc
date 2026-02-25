@@ -53,13 +53,26 @@
     @endphp
 
     <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-        <div class="bg-gray-50 border-b border-gray-100 p-6 flex justify-between items-center">
+
+        <div
+            class="bg-gray-50 border-b border-gray-100 p-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
             <h2 class="text-xl font-bold text-gray-900">
                 Colocation : <span class="text-blue-600">{{ $colocation->name }}</span>
             </h2>
-            <span class="bg-blue-100 text-blue-800 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wide">
-                {{ $colocation->owner_id === Auth::id() ? 'Owner' : 'Member' }}
-            </span>
+
+            <div class="flex items-center gap-3">
+                <span
+                    class="bg-blue-100 text-blue-800 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wide">
+                    {{ $colocation->owner_id === Auth::id() ? 'Owner' : 'Member' }}
+                </span>
+
+                @if(Auth::id() === $colocation->owner_id)
+                <a href="{{ url('/colocations/' . $colocation->id . '/settings') }}"
+                    class="bg-gray-900 hover:bg-gray-800 text-white text-sm font-medium py-1.5 px-3 rounded-lg transition flex items-center gap-1">
+                    ⚙️ Paramètres
+                </a>
+                @endif
+            </div>
         </div>
 
         <div class="p-6">

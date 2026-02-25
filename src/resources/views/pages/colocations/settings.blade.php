@@ -38,9 +38,9 @@
         <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
             <h2 class="text-xl font-bold text-gray-900 mb-4">🏷️ Catégories de dépenses</h2>
 
-            <form action="{{ url('/categories') }}" method="POST" class="flex gap-2 mb-4">
+            <form action="{{ route('colocations.category_settings', $colocation->id) }}" method="POST"
+                class="flex gap-2 mb-4">
                 @csrf
-                <input type="hidden" name="colocation_id" value="{{ $colocation->id }}">
                 <input type="text" name="name" placeholder="Nouvelle catégorie..."
                     class="flex-grow border border-gray-300 rounded-lg p-2 focus:border-blue-500 focus:outline-none"
                     required>
