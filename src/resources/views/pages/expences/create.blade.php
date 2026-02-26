@@ -90,7 +90,7 @@
             </div>
 
             <div class="pt-4 flex gap-3">
-                <a href="{{ url('/dashboard') }}"
+                <a href="{{ route('user.dashboard') }}"
                     class="w-1/3 text-center bg-gray-100 hover:bg-gray-200 text-gray-800 font-bold p-3 rounded-lg transition">
                     Annuler
                 </a>

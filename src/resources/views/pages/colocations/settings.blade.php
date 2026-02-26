@@ -16,10 +16,24 @@
 
         <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
             <h2 class="text-xl font-bold text-gray-900 mb-4">💌 Inviter un membre</h2>
+            @if(session('success'))
+            <div class="bg-green-50 border-l-4 border-green-500 p-4 mb-4 rounded-md">
+                <div class="flex">
+                    <div class="flex-shrink-0">
+                        <span class="text-green-500 text-xl">✓</span>
+                    </div>
+                    <div class="ml-3">
+                        <p class="text-sm text-green-700 font-medium">
+                            {{ session('success') }}
+                        </p>
+                    </div>
+                </div>
+            </div>
+            @endif
             <p class="text-sm text-gray-500 mb-4">Générez un token d'invitation pour permettre à un colocataire de vous
                 rejoindre.</p>
 
-            <form action="{{ url('/invitations') }}" method="POST" class="space-y-4">
+            <form action="{{ route('invitations.store') }}" method="POST" class="space-y-4">
                 @csrf
                 <input type="hidden" name="colocation_id" value="{{ $colocation->id }}">
                 <div>

@@ -71,7 +71,7 @@ class User extends Authenticatable
 
     public function currentColocation()
     {
-        return $this->colocations()->wherePivot('left_at', null)->first()
+        return $this->colocations()->wherePivotNull('left_at')->first()
             ?? $this->ownedColocations()->where('status', 'active')->first();
     }
 

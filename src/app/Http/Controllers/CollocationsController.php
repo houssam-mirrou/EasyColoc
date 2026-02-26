@@ -6,6 +6,7 @@ use App\Models\Category;
 use App\Models\Colocation;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class CollocationsController
 {
@@ -28,6 +29,10 @@ class CollocationsController
             'name' => $request->name,
             'owner_id' => Auth::user()->id,
             'status' => 'active',
+        ]);
+        DB::table('colocation_user')->insert([
+            'user_id' => Auth::user()->id,
+            'colocation_id' => Colocation::where('owner_id', Auth::user()->id)->first()->id,
         ]);
         if (Auth::user()->role === 'user') {
             return redirect()->route('user.dashboard')->with('success', 'Colocation créée avec succès');
@@ -81,6 +86,6 @@ class CollocationsController
             'name' => $request->name,
             'colocation_id' => Auth::user()->currentColocation()->id,
         ]);
-        return redirect()->route('colocations.settings');
+        return redirect()->back()->with('success', 'Catégorie créée avec succès');
     }
 }

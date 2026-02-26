@@ -2,7 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Category;
+use App\Models\Expense;
+use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class ExpensesController
 {
@@ -11,7 +15,8 @@ class ExpensesController
      */
     public function index()
     {
-    //
+        $categories = Category::all();
+        return view('pages.expences.index', compact('categories'));
     }
 
     /**
@@ -19,7 +24,10 @@ class ExpensesController
      */
     public function create()
     {
-        return view('pages.expences.create');
+        $colocation = Auth::user()->currentColocation();
+        $members = $colocation->members()->get();
+        $categories = Category::all();
+        return view('pages.expences.create', compact('categories', 'members'));
     }
 
     /**
@@ -27,7 +35,24 @@ class ExpensesController
      */
     public function store(Request $request)
     {
-    //
+        $request->validate([
+            'title' => 'required|string|max:255',
+            'amount' => 'required|numeric|min:0.01',
+            'expense_date' => 'required|date',
+            'category_id' => 'required|exists:categories,id',
+            'payer_id' => 'required|exists:users,id',
+        ]);
+
+        $expense = Expense::create([
+            'colocation_id' => Auth::user()->currentColocation()->id,
+            'payer_id' => $request->payer_id,
+            'category_id' => $request->category_id,
+            'title' => $request->title,
+            'amount' => $request->amount,
+            'expense_date' => $request->expense_date,
+        ]);
+
+        return redirect()->route('user.dashboard')->with('success', 'Expense created successfully');
     }
 
     /**
