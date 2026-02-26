@@ -21,13 +21,13 @@ Route::get('/admin/dashboard', [AdminDashboardController::class , 'index'])->nam
 Route::get('/home', [HomeController::class , 'index'])->name('home');
 Route::resource('colocations', CollocationsController::class);
 Route::resource('expenses', ExpensesController::class);
-Route::resource('balances', BalenceController::class);
 Route::get('/colocations/{id}/settings', [CollocationsController::class , 'settings'])->name('colocations.settings');
 Route::post('/colocations/{id}/category-settings', [CollocationsController::class , 'category_settings'])->name('colocations.category_settings');
 Route::post('invitations', [InvitationController::class , 'store'])->name('invitations.store');
 Route::post('invitations/accept', [InvitationController::class , 'accept'])->name('invitations.accept');
 Route::post('invitations/decline', [InvitationController::class , 'decline'])->name('invitations.decline');
-
+Route::get('/balances', [BalenceController::class , 'index'])->name('balances.index');
+Route::post('/balances', [BalenceController::class , 'store'])->name('balances.store');
 
 //DtRj1F7NsCVZMkQo56AKuccrtrnqVd9A omar
 //FKpewcmspJEn7ko7CfpukOzFjNZkAXdb houssam

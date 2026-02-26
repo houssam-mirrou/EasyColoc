@@ -7,6 +7,7 @@ use App\Models\Expense;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class ExpensesController
 {
@@ -50,6 +51,15 @@ class ExpensesController
             'title' => $request->title,
             'amount' => $request->amount,
             'expense_date' => $request->expense_date,
+        ]);
+
+        DB::table('payments')->insert([
+            'colocation_id' => Auth::user()->currentColocation()->id,
+            'payer_id' => $request->payer_id,
+            'receiver_id' => Auth::id(),
+            'amount' => $request->amount,
+            'created_at' => now(),
+            'updated_at' => now(),
         ]);
 
         return redirect()->route('user.dashboard')->with('success', 'Expense created successfully');
