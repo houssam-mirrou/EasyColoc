@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Category;
 use App\Models\Colocation;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -99,5 +100,21 @@ class CollocationsController
             'colocation_id' => Auth::user()->currentColocation()->id,
         ]);
         return redirect()->back()->with('success', 'Catégorie créée avec succès');
+    }
+
+    public function transfer_ownership(Request $request, string $colocation_id, string $user_id)
+    {
+        $colocation = Colocation::find($colocation_id);
+        $user = User::find($user_id);
+        $colocation->owner_id = $user->id;
+        $colocation->save();
+        return redirect()->route('colocations.show', $colocation_id)->with('success', 'Propriétaire transféré avec succès');
+    }
+
+    public function leave(string $colocation_id)
+    {
+        $colocation = Colocation::find($colocation_id);
+        $colocation->members()->detach(Auth::user()->id);
+        return redirect()->route('colocations.show', $colocation_id)->with('success', 'Vous avez quitté la colocation');
     }
 }

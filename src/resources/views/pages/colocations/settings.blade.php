@@ -116,7 +116,7 @@
                     <thead class="bg-gray-50 text-gray-500 text-xs uppercase tracking-wider font-semibold">
                         <tr>
                             <th class="px-6 py-4">Utilisateur</th>
-                            <th class="px-6 py-4 text-right">Action</th>
+                            <th class="px-6 py-4 text-right">Actions</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-100">
@@ -135,23 +135,36 @@
                                 </div>
                             </td>
                             <td class="px-6 py-4 text-right align-middle">
-                                @if($member->id !== Auth::id())
-                                <form
-                                    action="{{ url('/colocations/' . $colocation->id . '/remove-member/' . $member->id) }}"
-                                    method="POST"
-                                    onsubmit="return confirm('Attention : Si ce membre a des dettes, elles vous seront imputées selon les règles. Continuer ?');">
-                                    @csrf
-                                    <button type="submit"
-                                        class="inline-flex items-center gap-1.5 text-red-600 hover:text-red-800 text-sm font-bold bg-red-50 hover:bg-red-100 border border-red-100 px-4 py-2 rounded-lg transition-colors">
-                                        <i class="ph-bold ph-trash"></i> Retirer
-                                    </button>
-                                </form>
-                                @else
-                                <span
-                                    class="inline-flex items-center gap-1.5 bg-blue-50 text-blue-600 border border-blue-100 px-3 py-1.5 rounded-lg text-sm font-bold">
-                                    <i class="ph-bold ph-crown"></i> Vous (Owner)
-                                </span>
-                                @endif
+                                <div class="flex justify-end items-center gap-2">
+                                    @if($member->id !== Auth::id())
+                                    <form
+                                        action="{{ url('/colocations/' . $colocation->id . '/transfer-ownership/' . $member->id) }}"
+                                        method="POST"
+                                        onsubmit="return confirm('Êtes-vous sûr ? Vous ne serez plus l\'administrateur de cette colocation.');">
+                                        @csrf
+                                        <button type="submit"
+                                            class="inline-flex items-center gap-1.5 text-blue-600 hover:text-blue-800 text-sm font-bold bg-blue-50 hover:bg-blue-100 border border-blue-100 px-4 py-2 rounded-lg transition-colors">
+                                            <i class="ph-bold ph-crown"></i> Nommer Owner
+                                        </button>
+                                    </form>
+
+                                    <form
+                                        action="{{ url('/colocations/' . $colocation->id . '/remove-member/' . $member->id) }}"
+                                        method="POST"
+                                        onsubmit="return confirm('Attention : Si ce membre a des dettes, elles vous seront imputées selon les règles. Continuer ?');">
+                                        @csrf
+                                        <button type="submit"
+                                            class="inline-flex items-center gap-1.5 text-red-600 hover:text-red-800 text-sm font-bold bg-red-50 hover:bg-red-100 border border-red-100 px-4 py-2 rounded-lg transition-colors">
+                                            <i class="ph-bold ph-trash"></i> Retirer
+                                        </button>
+                                    </form>
+                                    @else
+                                    <span
+                                        class="inline-flex items-center gap-1.5 bg-blue-50 text-blue-600 border border-blue-100 px-3 py-1.5 rounded-lg text-sm font-bold">
+                                        <i class="ph-bold ph-crown"></i> Vous (Owner)
+                                    </span>
+                                    @endif
+                                </div>
                             </td>
                         </tr>
                         @endforeach

@@ -62,7 +62,7 @@ class ExpensesController
             'updated_at' => now(),
         ]);
 
-        return redirect()->route('user.dashboard')->with('success', 'Expense created successfully');
+        return redirect()->route('balances.index')->with('success', 'Expense created successfully');
     }
 
     /**

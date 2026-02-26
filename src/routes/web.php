@@ -28,6 +28,7 @@ Route::post('invitations/decline', [InvitationController::class , 'decline'])->n
 Route::get('/balances', [BalenceController::class , 'index'])->name('balances.index');
 Route::post('/balances', [BalenceController::class , 'store'])->name('balances.store');
 Route::resource('colocations', CollocationsController::class);
-
+Route::post('/colocations/{colocation_id}/transfer-ownership/{member_id}', [CollocationsController::class , 'transfer_ownership'])->name('colocations.transfer_ownership');
+Route::post('/colocations/{colocation_id}/leave', [CollocationsController::class , 'leave'])->name('colocations.leave');
 //DtRj1F7NsCVZMkQo56AKuccrtrnqVd9A omar
 //FKpewcmspJEn7ko7CfpukOzFjNZkAXdb houssam
