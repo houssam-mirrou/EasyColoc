@@ -32,11 +32,11 @@
 
     @include('partials.navbar')
 
-    <main class="flex-grow w-full">
+    <main class="flex-grow w-full pl-64">
         @yield('content')
     </main>
 
-    <footer class="bg-white border-t border-gray-200 py-6 mt-auto shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.02)]">
+    <footer class="bg-white border-t border-gray-200 py-6 mt-auto pl-64 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.02)]">
         <div class="max-w-6xl mx-auto px-4 flex items-center justify-center text-sm text-gray-400 font-medium gap-1">
             <i class="ph ph-copyright text-base"></i>
             <span>{{ date('Y') }} EasyColoc - Gestion de colocation.</span>

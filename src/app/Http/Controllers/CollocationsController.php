@@ -12,7 +12,18 @@ class CollocationsController
 {
     public function index()
     {
-        return view('pages.colocations.index');
+        $user = Auth::user();
+
+        // 1. Récupérer celles qu'il a créées
+        $owned = $user->ownedColocations;
+
+        // 2. Récupérer celles qu'il a rejointes (avec la date de départ éventuelle)
+        $member = $user->colocations()->withPivot('left_at')->get();
+
+        // 3. Fusionner les deux et trier par la plus récente
+        $allColocations = $owned->merge($member)->sortByDesc('created_at');
+
+        return view('pages.colocations.index', compact('allColocations'));
     }
 
     public function create()
@@ -43,7 +54,8 @@ class CollocationsController
 
     public function show(Colocation $colocation)
     {
-        return view('pages.colocations.show', compact('colocation'));
+        $expenses = $colocation->expenses;
+        return view('pages.colocations.show', compact('colocation', 'expenses'));
     }
 
     public function edit(Colocation $colocation)

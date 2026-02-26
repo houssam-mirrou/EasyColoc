@@ -19,7 +19,6 @@ Route::post('/logout', [AuthController::class , 'logout'])->name('logout');
 Route::get('/user/dashboard', [UserDashboardController::class , 'index'])->name('user.dashboard')->middleware('isUser');
 Route::get('/admin/dashboard', [AdminDashboardController::class , 'index'])->name('admin.dashboard')->middleware('isAdmin');
 Route::get('/home', [HomeController::class , 'index'])->name('home');
-Route::resource('colocations', CollocationsController::class);
 Route::resource('expenses', ExpensesController::class);
 Route::get('/colocations/{id}/settings', [CollocationsController::class , 'settings'])->name('colocations.settings');
 Route::post('/colocations/{id}/category-settings', [CollocationsController::class , 'category_settings'])->name('colocations.category_settings');
@@ -28,6 +27,7 @@ Route::post('invitations/accept', [InvitationController::class , 'accept'])->nam
 Route::post('invitations/decline', [InvitationController::class , 'decline'])->name('invitations.decline');
 Route::get('/balances', [BalenceController::class , 'index'])->name('balances.index');
 Route::post('/balances', [BalenceController::class , 'store'])->name('balances.store');
+Route::resource('colocations', CollocationsController::class);
 
 //DtRj1F7NsCVZMkQo56AKuccrtrnqVd9A omar
 //FKpewcmspJEn7ko7CfpukOzFjNZkAXdb houssam
