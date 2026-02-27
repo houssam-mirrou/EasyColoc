@@ -22,6 +22,9 @@ class InvitationController
         ]);
 
         $colocation = Colocation::findOrFail($request->colocation_id);
+        if ($colocation->status === 'cancelled') {
+            return redirect()->back()->with('error', 'Vous ne pouvez pas inviter de membres dans une colocation annulée.');
+        }
         $token = Str::random(32);
         $invitation = Invitation::create([
             'sender_id' => Auth::user()->id,
@@ -45,6 +48,11 @@ class InvitationController
         if (!$invitation) {
             return redirect()->back()->with('error', 'Invitation non trouvée');
         }
+
+        if (Auth::user()->currentColocation()) {
+            return redirect()->route('user.dashboard')->with('error', 'Vous avez déjà une colocation active. Vous ne pouvez pas en rejoindre une autre.');
+        }
+
         $invitation->status = 'accepted';
         $invitation->save();
         $receiver_id = User::where('email', $invitation->receiver_email)->first()->id;

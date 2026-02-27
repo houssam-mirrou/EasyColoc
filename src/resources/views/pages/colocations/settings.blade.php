@@ -25,6 +25,13 @@
 
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
 
+        @if(session('error'))
+        <div class="md:col-span-2 bg-red-50 border border-red-200 p-4 rounded-xl flex items-start gap-3">
+            <i class="ph-fill ph-warning-circle text-xl text-red-500 mt-0.5"></i>
+            <p class="text-sm text-red-700 font-medium">{{ session('error') }}</p>
+        </div>
+        @endif
+
         <div
             class="bg-white p-6 sm:p-8 rounded-2xl shadow-[0_2px_10px_rgb(0,0,0,0.02)] border border-gray-100 flex flex-col">
             <div class="flex items-center gap-2 mb-2">
@@ -178,20 +185,31 @@
                 class="ph-fill ph-warning absolute -right-4 -bottom-4 text-9xl text-red-500 opacity-5 pointer-events-none"></i>
 
             <div class="relative z-10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
-                <div>
+                <div class="flex-grow">
                     <h2 class="text-xl font-black text-red-800 mb-1 flex items-center gap-2">
                         <i class="ph-bold ph-warning-circle text-2xl"></i> Zone de Danger
                     </h2>
-                    <p class="text-sm font-medium text-red-600/80">L'annulation de la colocation est irréversible. Le
+                    <p class="text-sm font-medium text-red-600/80 mb-2">L'annulation de la colocation est irréversible.
+                        Le
                         groupe sera dissous et toutes les dettes seront archivées.</p>
+
+                    @if(Auth::user()->hasDebt())
+                    <div class="bg-red-100 border border-red-300 p-3 rounded-xl flex items-start gap-2">
+                        <i class="ph-fill ph-warning-circle text-lg text-red-600 mt-0.5"></i>
+                        <p class="text-sm text-red-800 font-bold">Action impossible : Vous devez payer votre dette avant
+                            de pouvoir annuler la colocation.</p>
+                    </div>
+                    @endif
                 </div>
 
                 <form action="{{ url('/colocations/' . $colocation->id . '/cancel') }}" method="POST"
                     onsubmit="return confirm('Êtes-vous absolument sûr de vouloir annuler cette colocation ? Cette action est définitive.');"
                     class="w-full sm:w-auto shrink-0">
                     @csrf
-                    <button type="submit"
-                        class="w-full sm:w-auto flex items-center justify-center gap-2 bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-6 rounded-xl shadow-sm hover:shadow-md transition-all border border-red-700">
+                    <button type="submit" @if(Auth::user()->hasDebt()) disabled @endif
+                        class="w-full sm:w-auto flex items-center justify-center gap-2 {{ Auth::user()->hasDebt() ?
+                        'bg-gray-400 cursor-not-allowed border-gray-400' : 'bg-red-600 hover:bg-red-700 border-red-700'
+                        }} text-white font-bold py-3 px-6 rounded-xl shadow-sm hover:shadow-md transition-all border">
                         <i class="ph-bold ph-trash-simple"></i> Annuler la Colocation
                     </button>
                 </form>

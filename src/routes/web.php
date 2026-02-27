@@ -17,7 +17,9 @@ Route::post('/login', [AuthController::class , 'handleLogin'])->name('login.hand
 Route::post('/register', [AuthController::class , 'handleRegister'])->name('register.handle');
 Route::post('/logout', [AuthController::class , 'logout'])->name('logout');
 Route::get('/user/dashboard', [UserDashboardController::class , 'index'])->name('user.dashboard')->middleware('isUser');
+Route::get('/profile', [UserDashboardController::class , 'profile'])->name('profile')->middleware('auth');
 Route::get('/admin/dashboard', [AdminDashboardController::class , 'index'])->name('admin.dashboard')->middleware('isAdmin');
+Route::post('/admin/users/{user}/toggle-ban', [AdminDashboardController::class , 'toggleBan'])->name('admin.users.toggle_ban')->middleware('isAdmin');
 Route::get('/home', [HomeController::class , 'index'])->name('home');
 Route::resource('expenses', ExpensesController::class);
 Route::get('/colocations/{id}/settings', [CollocationsController::class , 'settings'])->name('colocations.settings');
@@ -30,5 +32,8 @@ Route::post('/balances', [BalenceController::class , 'store'])->name('balances.s
 Route::resource('colocations', CollocationsController::class);
 Route::post('/colocations/{colocation_id}/transfer-ownership/{member_id}', [CollocationsController::class , 'transfer_ownership'])->name('colocations.transfer_ownership');
 Route::post('/colocations/{colocation_id}/leave', [CollocationsController::class , 'leave'])->name('colocations.leave');
+Route::post('/colocations/{colocation_id}/cancel', [CollocationsController::class , 'destroy'])->name('colocations.cancel');
+
+
 //DtRj1F7NsCVZMkQo56AKuccrtrnqVd9A omar
 //FKpewcmspJEn7ko7CfpukOzFjNZkAXdb houssam

@@ -18,21 +18,31 @@ class BalenceController
         $user = Auth::user();
         $colocation = $user->currentColocation();
 
-        // 1. Get all members (Owner + Pivot members)
-        $members = $colocation->members;
+        if (!$colocation) {
+            return redirect()->route('dashboard')->with('error', 'Vous n\'avez pas de colocation active.');
+        }
+
+        // 1. On ne récupère QUE les membres ACTIFS pour le calcul des parts
+        // On utilise la relation activeMembers ou on filtre manuellement
+        $members = $colocation->members()->wherePivotNull('left_at')->get();
+
+        // On s'assure que l'Owner est dans la liste (même s'il n'est pas dans le pivot)
         $owner = User::find($colocation->owner_id);
         if (!$members->contains($owner)) {
             $members->push($owner);
         }
 
-        // 2. Calculate the Equal Share
+        // 2. Calcul de la Part Équitable pour les membres actuels
         $totalExpenses = Expense::where('colocation_id', $colocation->id)->sum('amount');
         $memberCount = $members->count();
+
+        // IMPORTANT : La part individuelle est basée sur le nombre de personnes qui vont payer MAINTENANT
         $sharePerPerson = $memberCount > 0 ? $totalExpenses / $memberCount : 0;
 
-        // 3. Calculate Individual Net Balances
         $balances = [];
         foreach ($members as $member) {
+            // On prend TOUTES les dépenses et paiements de l'histoire, 
+            // car la dette du membre parti a été transférée à l'Owner via la table Payment
             $paidExpenses = Expense::where('colocation_id', $colocation->id)
                 ->where('payer_id', $member->id)
                 ->sum('amount');
@@ -45,7 +55,7 @@ class BalenceController
                 ->where('receiver_id', $member->id)
                 ->sum('amount');
 
-            // Net Balance = (What they bought - What they should have paid) + What they reimbursed others - What others reimbursed them
+            // Formule de balance nette
             $netBalance = ($paidExpenses - $sharePerPerson) + $sentPayments - $receivedPayments;
 
             $balances[$member->id] = [
@@ -54,43 +64,35 @@ class BalenceController
             ];
         }
 
-        // 4. Algorithm to calculate "Who owes whom" (Suggested Debts)
+        // 3. Algorithme "Qui doit à qui"
         $debtors = array_filter($balances, fn($b) => $b['balance'] < -0.01);
         $creditors = array_filter($balances, fn($b) => $b['balance'] > 0.01);
 
-        usort($debtors, fn($a, $b) => $a['balance'] <=> $b['balance']); // Most negative first
-        usort($creditors, fn($a, $b) => $b['balance'] <=> $a['balance']); // Most positive first
+        usort($debtors, fn($a, $b) => $a['balance'] <=> $b['balance']);
+        usort($creditors, fn($a, $b) => $b['balance'] <=> $a['balance']);
 
         $suggestedPayments = [];
         $debtorsList = array_values($debtors);
         $creditorsList = array_values($creditors);
-        $i = 0;
-        $j = 0;
+        $i = $j = 0;
 
         while ($i < count($debtorsList) && $j < count($creditorsList)) {
-            $debtor = $debtorsList[$i];
-            $creditor = $creditorsList[$j];
-
-            $amountToSettle = min(abs($debtor['balance']), $creditor['balance']);
-
-            if ($amountToSettle > 0.01) {
+            $amount = min(abs($debtorsList[$i]['balance']), $creditorsList[$j]['balance']);
+            if ($amount > 0.01) {
                 $suggestedPayments[] = [
-                    'from' => $debtor['user'],
-                    'to' => $creditor['user'],
-                    'amount' => round($amountToSettle, 2)
+                    'from' => $debtorsList[$i]['user'],
+                    'to' => $creditorsList[$j]['user'],
+                    'amount' => round($amount, 2)
                 ];
             }
-
-            $debtorsList[$i]['balance'] += $amountToSettle;
-            $creditorsList[$j]['balance'] -= $amountToSettle;
-
+            $debtorsList[$i]['balance'] += $amount;
+            $creditorsList[$j]['balance'] -= $amount;
             if (abs($debtorsList[$i]['balance']) < 0.01)
                 $i++;
             if ($creditorsList[$j]['balance'] < 0.01)
                 $j++;
         }
 
-        // 5. Get History of Payments
         $pastPayments = Payment::where('colocation_id', $colocation->id)->orderBy('created_at', 'desc')->get();
 
         return view('pages.balences.index', compact('balances', 'suggestedPayments', 'pastPayments', 'members'));

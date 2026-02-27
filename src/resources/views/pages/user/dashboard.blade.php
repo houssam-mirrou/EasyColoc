@@ -162,10 +162,10 @@
                         class="w-10 h-10 rounded-full bg-white shadow-sm border border-gray-100 flex items-center justify-center text-gray-400 mb-3">
                         <i class="ph-bold ph-wallet"></i>
                     </div>
-                    <span class="block text-gray-500 mb-1 text-sm font-semibold uppercase tracking-wider">Mon Solde
-                        Actuel</span>
-                    <span class="text-4xl font-black text-gray-900 tracking-tight">0.00 <span
-                            class="text-xl text-gray-400">MAD</span></span>
+                    <span class="block text-gray-500 mb-1 text-sm font-semibold uppercase tracking-wider">Mes
+                        Dépenses</span>
+                    <span class="text-4xl font-black text-gray-900 tracking-tight">{{ number_format($personal_spent, 2)
+                        }} <span class="text-xl text-gray-400">MAD</span></span>
                 </div>
 
                 <div class="flex flex-col justify-center">

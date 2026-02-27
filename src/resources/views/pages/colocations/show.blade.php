@@ -33,7 +33,7 @@
                     <span>Paramètres</span>
                 </a>
                 @else
-                <form action="{{ url('/colocations/leave') }}" method="POST"
+                <form action="{{ url('/colocations/' . $colocation->id . '/leave') }}" method="POST"
                     onsubmit="return confirm('Voulez-vous vraiment quitter cette colocation ?');"
                     class="flex-1 md:flex-none">
                     @csrf

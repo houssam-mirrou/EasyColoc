@@ -26,6 +26,9 @@ class ExpensesController
     public function create()
     {
         $colocation = Auth::user()->currentColocation();
+        if ($colocation->status === 'cancelled') {
+            return redirect()->back()->with('error', 'Vous ne pouvez pas ajouter de dépenses à une colocation annulée.');
+        }
         $members = $colocation->members()->get();
         $categories = Category::all();
         return view('pages.expences.create', compact('categories', 'members'));
@@ -44,8 +47,13 @@ class ExpensesController
             'payer_id' => 'required|exists:users,id',
         ]);
 
+        $colocation = Auth::user()->currentColocation();
+        if ($colocation->status === 'cancelled') {
+            return redirect()->back()->with('error', 'Vous ne pouvez pas ajouter de dépenses à une colocation annulée.');
+        }
+
         $expense = Expense::create([
-            'colocation_id' => Auth::user()->currentColocation()->id,
+            'colocation_id' => $colocation->id,
             'payer_id' => $request->payer_id,
             'category_id' => $request->category_id,
             'title' => $request->title,
@@ -54,7 +62,7 @@ class ExpensesController
         ]);
 
         DB::table('payments')->insert([
-            'colocation_id' => Auth::user()->currentColocation()->id,
+            'colocation_id' => $colocation->id,
             'payer_id' => $request->payer_id,
             'receiver_id' => Auth::id(),
             'amount' => $request->amount,

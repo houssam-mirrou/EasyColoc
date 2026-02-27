@@ -26,7 +26,6 @@
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         @foreach($allColocations as $coloc)
         @php
-        // Logique pour déterminer l'affichage
         $isOwner = $coloc->owner_id === Auth::id();
         $hasLeft = isset($coloc->pivot) && $coloc->pivot->left_at !== null;
         $isCancelled = $coloc->status === 'cancelled';

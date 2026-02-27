@@ -16,6 +16,22 @@
         </div>
     </div>
 
+    @if(session('success'))
+    <div
+        class="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-xl shadow-sm mb-6 flex items-center gap-3">
+        <i class="ph-fill ph-check-circle text-xl text-green-500"></i>
+        <p class="font-medium">{{ session('success') }}</p>
+    </div>
+    @endif
+
+    @if(session('error'))
+    <div
+        class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl shadow-sm mb-6 flex items-center gap-3">
+        <i class="ph-fill ph-warning-circle text-xl text-red-500"></i>
+        <p class="font-medium">{{ session('error') }}</p>
+    </div>
+    @endif
+
     <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-10">
         <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 flex items-center gap-4">
             <div class="p-3 bg-blue-100 text-blue-600 rounded-lg text-2xl">👥</div>
@@ -70,87 +86,65 @@
                 </thead>
                 <tbody class="divide-y divide-gray-100">
 
-                    {{-- Boucle sur les utilisateurs : @foreach($users as $user) --}}
-                    {{-- Exemple avec des données statiques pour le moment --}}
-                    <tr class="hover:bg-gray-50 transition">
-                        <td class="p-4 text-gray-500 text-sm">#1</td>
+                    @foreach($users as $user)
+                    <tr class="hover:bg-gray-50 transition {{ $user->is_banned ? 'bg-red-50/30' : '' }}">
+                        <td class="p-4 text-gray-500 text-sm">#{{ $user->id }}</td>
                         <td class="p-4">
-                            <p class="font-bold text-gray-900">Houssam</p>
-                            <p class="text-sm text-gray-500">houssam@example.com</p>
+                            <p
+                                class="font-bold {{ $user->is_banned ? 'text-gray-900 line-through text-gray-500' : 'text-gray-900' }}">
+                                {{ $user->name }}</p>
+                            <p class="text-sm text-gray-500">{{ $user->email }}</p>
                         </td>
                         <td class="p-4">
+                            @if($user->role === 'admin')
                             <span
                                 class="bg-purple-100 text-purple-800 text-xs font-bold px-3 py-1 rounded-full">Admin</span>
-                        </td>
-                        <td class="p-4 text-center font-bold text-green-600">+5</td>
-                        <td class="p-4 text-center">
-                            <span
-                                class="bg-green-100 text-green-800 text-xs font-bold px-3 py-1 rounded-full">Actif</span>
-                        </td>
-                        <td class="p-4 text-right">
-                            <span class="text-gray-400 text-sm italic">Intouchable</span>
-                        </td>
-                    </tr>
-
-                    <tr class="hover:bg-gray-50 transition">
-                        <td class="p-4 text-gray-500 text-sm">#2</td>
-                        <td class="p-4">
-                            <p class="font-bold text-gray-900">Jean Dupont</p>
-                            <p class="text-sm text-gray-500">jean@example.com</p>
-                        </td>
-                        <td class="p-4">
+                            @else
                             <span class="bg-gray-100 text-gray-800 text-xs font-bold px-3 py-1 rounded-full">User</span>
+                            @endif
                         </td>
-                        <td class="p-4 text-center font-bold text-red-600">-2</td>
+                        <td
+                            class="p-4 text-center font-bold {{ $user->reputation_score >= 0 ? 'text-green-600' : 'text-red-600' }}">
+                            {{ $user->reputation_score > 0 ? '+' : '' }}{{ $user->reputation_score }}
+                        </td>
                         <td class="p-4 text-center">
-                            <span
-                                class="bg-green-100 text-green-800 text-xs font-bold px-3 py-1 rounded-full">Actif</span>
-                        </td>
-                        <td class="p-4 text-right">
-                            <form action="#" method="POST" class="inline">
-                                @csrf
-                                {{-- @method('PATCH') --}}
-                                <button type="submit"
-                                    class="bg-red-50 hover:bg-red-100 text-red-600 font-medium px-4 py-2 rounded-lg border border-red-200 transition">
-                                    Bannir
-                                </button>
-                            </form>
-                        </td>
-                    </tr>
-
-                    <tr class="hover:bg-gray-50 transition bg-red-50/30">
-                        <td class="p-4 text-gray-500 text-sm">#3</td>
-                        <td class="p-4">
-                            <p class="font-bold text-gray-900 line-through text-gray-500">Marc Escroc</p>
-                            <p class="text-sm text-gray-500">marc@example.com</p>
-                        </td>
-                        <td class="p-4">
-                            <span class="bg-gray-100 text-gray-800 text-xs font-bold px-3 py-1 rounded-full">User</span>
-                        </td>
-                        <td class="p-4 text-center font-bold text-red-600">-10</td>
-                        <td class="p-4 text-center">
+                            @if($user->is_banned)
                             <span class="bg-red-100 text-red-800 text-xs font-bold px-3 py-1 rounded-full">Banni</span>
+                            @else
+                            <span
+                                class="bg-green-100 text-green-800 text-xs font-bold px-3 py-1 rounded-full">Actif</span>
+                            @endif
                         </td>
                         <td class="p-4 text-right">
-                            <form action="#" method="POST" class="inline">
+                            @if($user->id === Auth::id())
+                            <span class="text-gray-400 text-sm italic">Intouchable</span>
+                            @else
+                            <form action="{{ route('admin.users.toggle_ban', $user->id) }}" method="POST"
+                                class="inline">
                                 @csrf
-                                {{-- @method('PATCH') --}}
+                                @if($user->is_banned)
                                 <button type="submit"
                                     class="bg-green-50 hover:bg-green-100 text-green-600 font-medium px-4 py-2 rounded-lg border border-green-200 transition">
                                     Débannir
                                 </button>
+                                @else
+                                <button type="submit"
+                                    class="bg-red-50 hover:bg-red-100 text-red-600 font-medium px-4 py-2 rounded-lg border border-red-200 transition">
+                                    Bannir
+                                </button>
+                                @endif
                             </form>
+                            @endif
                         </td>
                     </tr>
-                    {{-- @endforeach --}}
+                    @endforeach
 
                 </tbody>
             </table>
         </div>
 
         <div class="p-4 border-t border-gray-100 text-gray-500 text-sm text-center">
-            {{-- {{ $users->links() }} --}}
-            Pagination viendra ici...
+            {{ $users->links() }}
         </div>
     </div>
 
