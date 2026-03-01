@@ -20,13 +20,19 @@
             </div>
 
             <div class="flex flex-wrap gap-3 w-full md:w-auto">
-                <a href="{{ url('/balances') }}"
+                <a href="{{ route('balances.index', $colocation->id) }}"
                     class="flex-1 md:flex-none flex items-center justify-center gap-2 bg-white/10 hover:bg-white/20 text-white font-bold py-2.5 px-5 rounded-xl transition-all border border-white/10">
                     <i class="ph-bold ph-chart-bar text-xl"></i>
                     <span>Balances</span>
                 </a>
 
-                @if(Auth::id() === $colocation->owner_id)
+                @if($colocation->status === 'desactive')
+                <button disabled
+                    class="flex-1 md:flex-none flex items-center justify-center gap-2 bg-gray-800 text-gray-500 font-bold py-2.5 px-5 rounded-xl border border-gray-700 cursor-not-allowed">
+                    <i class="ph-bold ph-lock-key text-xl"></i>
+                    <span>Colocation Annulée</span>
+                </button>
+                @elseif($colocation->activeMembers->where('id', Auth::id())->first()?->pivot->role === 'owner')
                 <a href="{{ url('/colocations/' . $colocation->id . '/settings') }}"
                     class="flex-1 md:flex-none flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-500 text-white font-bold py-2.5 px-5 rounded-xl transition-all shadow-sm">
                     <i class="ph-bold ph-gear text-xl"></i>
@@ -85,8 +91,8 @@
                             </div>
                         </div>
                         <span
-                            class="text-[10px] font-black px-2 py-1 rounded-lg uppercase tracking-wider {{ $member->id === $colocation->owner_id ? 'bg-purple-50 text-purple-600 border border-purple-100' : 'bg-gray-100 text-gray-500 border border-gray-200' }}">
-                            {{ $member->id === $colocation->owner_id ? 'Owner' : 'Membre' }}
+                            class="text-[10px] font-black px-2 py-1 rounded-lg uppercase tracking-wider {{ $member->pivot->role === 'owner' ? 'bg-purple-50 text-purple-600 border border-purple-100' : 'bg-gray-100 text-gray-500 border border-gray-200' }}">
+                            {{ ucfirst($member->pivot->role) }}
                         </span>
                     </div>
                     @endforeach
@@ -125,10 +131,17 @@
                             </button>
                         </form>
 
-                        <a href="{{ url('/expenses/create') }}"
+                        @if($colocation->status === 'desactive')
+                        <button disabled
+                            class="bg-gray-100 border border-gray-200 text-gray-400 font-bold py-2 px-4 rounded-xl shadow-sm text-xs flex items-center gap-1.5 cursor-not-allowed">
+                            <i class="ph-bold ph-lock-key"></i> Ajouter
+                        </button>
+                        @else
+                        <a href="{{ route('expenses.create', $colocation->id) }}"
                             class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-xl shadow-sm hover:shadow-md transition-all text-xs flex items-center gap-1.5">
                             <i class="ph-bold ph-plus"></i> Ajouter
                         </a>
+                        @endif
                     </div>
                 </div>
 
@@ -147,7 +160,7 @@
                             @forelse($expenses as $expense)
                             <tr class="group hover:bg-blue-50/30 transition-colors">
                                 <td class="px-6 py-4 text-xs font-bold text-gray-400">
-                                    {{ \Carbon\Carbon::parse($expense->expense_date)->format('d/m/Y') }}
+                                    {{ \Carbon\Carbon::parse($expense->created_at)->format('d/m/Y') }}
                                 </td>
                                 <td class="px-6 py-4 font-bold text-gray-900 text-sm">
                                     {{ $expense->title }}
@@ -162,10 +175,10 @@
                                     <div class="flex items-center gap-2">
                                         <div
                                             class="w-6 h-6 rounded-full bg-gray-100 flex items-center justify-center text-[10px] font-bold text-gray-500">
-                                            {{ substr($expense->payer->name, 0, 1) }}
+                                            {{ substr($expense->colocationMember->user->name, 0, 1) }}
                                         </div>
-                                        <span class="text-xs font-semibold text-gray-600">{{ $expense->payer->name
-                                            }}</span>
+                                        <span class="text-xs font-semibold text-gray-600">{{
+                                            $expense->colocationMember->user->name }}</span>
                                     </div>
                                 </td>
                                 <td class="px-6 py-4 text-right font-black text-gray-900">

@@ -16,6 +16,14 @@
             <p class="text-sm text-gray-500 font-medium mt-1">Rejoignez EasyColoc dès aujourd'hui 🚀</p>
         </div>
 
+        @if(session('error'))
+        <div
+            class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl shadow-sm mb-6 flex items-center gap-3">
+            <i class="ph-fill ph-warning-circle text-xl text-red-500"></i>
+            <p class="font-medium text-sm">{{ session('error') }}</p>
+        </div>
+        @endif
+
         <form action="{{ route('register.handle') }}" method="POST" class="space-y-5">
             @csrf
 

@@ -12,7 +12,7 @@
             </h1>
             <p class="text-gray-500 font-medium mt-1">État des comptes pour les membres actifs</p>
         </div>
-        <a href="{{ route('expenses.create') }}"
+        <a href="{{ route('expenses.create', $colocation->id) }}"
             class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-xl transition-all shadow-sm">
             + Nouvelle Dépense
         </a>
@@ -78,9 +78,9 @@
                                     $payment->created_at->format('d/m/Y') }}</td>
                                 <td class="px-6 py-4">
                                     <div class="text-sm font-bold text-gray-700">
-                                        {{ $payment->payer->name }} <span
+                                        {{ $payment->colocationMember->user->name }} <span
                                             class="text-gray-300 font-normal px-1">rembourse</span> {{
-                                        $payment->receiver->name }}
+                                        $payment->expense->colocationMember->user->name }}
                                     </div>
                                 </td>
                                 <td class="px-6 py-4 text-right">
@@ -118,7 +118,7 @@
                                 <span class="text-lg font-black text-red-600">{{ number_format($debt['amount'], 2) }}
                                     MAD</span>
                             </div>
-                            <form action="{{ route('balances.store') }}" method="POST">
+                            <form action="{{ route('balances.store', $colocation->id) }}" method="POST">
                                 @csrf
                                 <input type="hidden" name="receiver_id" value="{{ $debt['to']->id }}">
                                 <input type="hidden" name="amount" value="{{ $debt['amount'] }}">

@@ -138,13 +138,16 @@
             </div>
 
             <div class="flex items-center gap-3 w-full sm:w-auto">
+                @php
+                $isOwner = isset($colocation->pivot) && $colocation->pivot->role === 'owner';
+                @endphp
                 <span
-                    class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold uppercase tracking-wide {{ $colocation->owner_id === Auth::id() ? 'bg-blue-500/20 text-blue-400 border border-blue-500/30' : 'bg-gray-800 text-gray-300 border border-gray-700' }}">
-                    <i class="{{ $colocation->owner_id === Auth::id() ? 'ph-bold ph-crown' : 'ph-bold ph-user' }}"></i>
-                    {{ $colocation->owner_id === Auth::id() ? 'Owner' : 'Member' }}
+                    class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold uppercase tracking-wide {{ $isOwner ? 'bg-blue-500/20 text-blue-400 border border-blue-500/30' : 'bg-gray-800 text-gray-300 border border-gray-700' }}">
+                    <i class="{{ $isOwner ? 'ph-bold ph-crown' : 'ph-bold ph-user' }}"></i>
+                    {{ $isOwner ? 'Owner' : 'Member' }}
                 </span>
 
-                @if(Auth::id() === $colocation->owner_id)
+                @if($isOwner)
                 <a href="{{ url('/colocations/' . $colocation->id . '/settings') }}"
                     class="ml-auto sm:ml-0 bg-white/10 hover:bg-white/20 text-white text-sm font-bold py-2 px-3.5 rounded-lg transition-colors flex items-center gap-2">
                     <i class="ph-bold ph-gear"></i> Paramètres
@@ -169,7 +172,7 @@
                 </div>
 
                 <div class="flex flex-col justify-center">
-                    <a href="{{ route('expenses.create') }}"
+                    <a href="{{ route('expenses.create', $colocation->id) }}"
                         class="group h-full flex flex-col items-center justify-center p-6 bg-blue-600 hover:bg-blue-700 text-white rounded-2xl shadow-sm hover:shadow-md hover:-translate-y-1 transition-all">
                         <i class="ph-bold ph-receipt text-3xl mb-2 group-hover:scale-110 transition-transform"></i>
                         <span class="font-bold text-lg">Ajouter une dépense</span>
@@ -178,7 +181,7 @@
                 </div>
 
                 <div class="flex flex-col justify-center">
-                    <a href="{{ route('balances.index') }}"
+                    <a href="{{ route('balances.index', $colocation->id) }}"
                         class="group h-full flex flex-col items-center justify-center p-6 border-2 border-gray-200 hover:border-blue-500 hover:bg-blue-50 text-gray-700 hover:text-blue-700 rounded-2xl transition-all">
                         <i
                             class="ph-bold ph-scales text-3xl mb-2 text-gray-400 group-hover:text-blue-500 group-hover:scale-110 transition-all"></i>

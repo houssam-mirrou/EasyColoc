@@ -49,75 +49,58 @@ class User extends Authenticatable
         ];
     }
 
-    public function ownedColocations()
+    public function colocationMembers()
     {
-        return $this->hasMany(Colocation::class , 'owner_id');
+        return $this->hasMany(ColocationMember::class);
     }
 
     public function colocations()
     {
-        return $this->belongsToMany(Colocation::class , 'colocation_user')->withPivot('left_at')->withTimestamps();
+        return $this->belongsToMany(Colocation::class , 'colocation_members')->withPivot('role', 'left_at')->withTimestamps();
     }
 
-    public function expenses()
-    {
-        return $this->hasMany(Expense::class , 'payer_id');
-    }
-
-    public function payments()
-    {
-        return $this->hasMany(Payment::class , 'payer_id');
-    }
+    // Removed expenses() and payments() directly from User, as they route through ColocationMember now.
 
     public function currentColocation()
     {
-        return $this->colocations()->where('colocations.status', 'active')->wherePivotNull('left_at')->first()
-            ?? Colocation::where('owner_id', $this->id)->where('status', 'active')->first();
+        return $this->colocations()->where([['status', '=', 'active']])->wherePivotNull('left_at')->first();
     }
 
     /**
      * Calculate the user's current net balance in their active colocation.
      * Positive = They are owed money. Negative = They owe money (debt).
      */
-    public function getColocationBalance()
+    public function getColocationBalance($colocation_id = null)
     {
-        $colocation = $this->currentColocation();
+        $colocation = $colocation_id ?Colocation::find($colocation_id) : $this->currentColocation();
         if (!$colocation) {
             return 0;
         }
 
-        $members = $colocation->members()->wherePivotNull('left_at')->get();
-        $owner = User::find($colocation->owner_id);
-        if ($owner && !$members->contains($owner)) {
-            $members->push($owner);
+        $myMemberId = $this->colocationMembers()->where('colocation_id', $colocation->id)->value('id');
+        if (!$myMemberId) {
+            return 0;
         }
 
-        $totalExpenses = Expense::where('colocation_id', $colocation->id)->sum('amount');
-        $memberCount = $members->count();
-        $sharePerPerson = $memberCount > 0 ? $totalExpenses / $memberCount : 0;
-
-        $paidExpenses = Expense::where('colocation_id', $colocation->id)
-            ->where('payer_id', $this->id)
+        $myDebt = ExpenseDetail::where('colocation_member_id', $myMemberId)
+            ->where('status', 'pending')
             ->sum('amount');
 
-        $sentPayments = Payment::where('colocation_id', $colocation->id)
-            ->where('payer_id', $this->id)
+        $owedToMe = ExpenseDetail::whereHas('expense', function ($q) use ($myMemberId) {
+            $q->where('colocation_member_id', $myMemberId);
+        })
+            ->where('status', 'pending')
             ->sum('amount');
 
-        $receivedPayments = Payment::where('colocation_id', $colocation->id)
-            ->where('receiver_id', $this->id)
-            ->sum('amount');
-
-        $netBalance = ($paidExpenses - $sharePerPerson) + $sentPayments - $receivedPayments;
-
+        $netBalance = $owedToMe - $myDebt;
         return round($netBalance, 2);
     }
 
     /**
      * Check if the user currently has any debt in their active colocation.
      */
-    public function hasDebt()
+    public function hasDebt($colocation_id = null)
     {
-        return $this->getColocationBalance() < -0.01;
+        return $this->getColocationBalance($colocation_id) < -0.01;
     }
 }

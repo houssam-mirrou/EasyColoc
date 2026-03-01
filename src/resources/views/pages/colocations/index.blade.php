@@ -26,9 +26,9 @@
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         @foreach($allColocations as $coloc)
         @php
-        $isOwner = $coloc->owner_id === Auth::id();
+        $isOwner = isset($coloc->pivot) && $coloc->pivot->role === 'owner';
         $hasLeft = isset($coloc->pivot) && $coloc->pivot->left_at !== null;
-        $isCancelled = $coloc->status === 'cancelled';
+        $isCancelled = $coloc->status === 'desactive';
         $isActive = !$isCancelled && !$hasLeft;
         @endphp
 

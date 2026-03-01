@@ -5,27 +5,20 @@ use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
-        Schema::create('expenses', function (Blueprint $table) {
+        Schema::create('expense_details', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('expense_id')->constrained()->onDelete('cascade');
             $table->foreignId('colocation_member_id')->constrained('colocation_members')->onDelete('cascade');
-            $table->foreignId('category_id')->constrained()->onDelete('cascade');
-
-            $table->string('title');
             $table->decimal('amount', 10, 2);
+            $table->enum('status', ['paid', 'pending'])->default('pending');
             $table->timestamps();
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
-        Schema::dropIfExists('expenses');
+        Schema::dropIfExists('expense_details');
     }
 };

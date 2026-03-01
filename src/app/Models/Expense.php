@@ -7,22 +7,20 @@ use Illuminate\Database\Eloquent\Model;
 class Expense extends Model
 {
     protected $fillable = [
-        'colocation_id',
-        'payer_id',
+        'colocation_member_id',
         'category_id',
         'title',
         'amount',
-        'expense_date',
     ];
 
-    public function colocation()
+    public function colocationMember()
     {
-        return $this->belongsTo(Colocation::class);
+        return $this->belongsTo(ColocationMember::class);
     }
 
-    public function payer()
+    public function expenseDetails()
     {
-        return $this->belongsTo(User::class , 'payer_id');
+        return $this->hasMany(ExpenseDetail::class);
     }
 
     public function category()

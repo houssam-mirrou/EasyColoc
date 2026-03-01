@@ -1,0 +1,96 @@
+@startuml
+left to right direction
+skinparam packageStyle rectangle
+skinparam monochrome true
+skinparam shadowing false
+
+actor "User" as U
+actor "Owner" as O
+actor "Member" as M
+actor "Admin" as A
+
+' Actor Inheritance
+O --|> U
+M --|> U
+A --|> U
+
+rectangle "EasyColoc" {
+    ' General Use Cases
+    usecase "Se connecter" as UC_Login
+    usecase "S'inscrire" as UC_Register
+    usecase "Gérer le profil" as UC_Profile
+
+    ' Owner Specific
+    usecase "Gérer les membres" as UC_ManageMembers
+    usecase "Inviter des membres" as UC_Invite
+    usecase "Supprimer des membres" as UC_RemoveMember
+    
+    usecase "Gérer les collocations" as UC_ManageColloc
+    usecase "Créer une collocation" as UC_CreateColloc
+    usecase "Annuler une collocation" as UC_CancelColloc
+
+    ' Member Specific
+    usecase "Rejoindre une collocation via une invitation" as UC_Join
+    usecase "Voir les membres, rôles et réputations" as UC_ViewMembers
+    usecase "Ajouter une dépense" as UC_AddExpense
+    usecase "Marquer un paiement" as UC_MarkPayment
+    usecase "Voir son solde" as UC_ViewBalance
+    usecase "Consulter 'qui doit à qui'" as UC_WhoOwesWho
+    usecase "Quitter une collocation" as UC_Quit
+
+    ' Admin Specific
+    usecase "Voir les statistiques" as UC_Stats
+    usecase "Gérer les utilisateurs" as UC_ManageUsers
+    usecase "Bannir les utilisateurs" as UC_Ban
+    usecase "Débannir les utilisateurs" as UC_Unban
+
+    ' --- Relationships ---
+
+    ' User Associations
+    U -- UC_Register
+    U -- UC_Login
+    U -- UC_Profile
+
+    ' Owner Associations
+    O -- UC_ManageMembers
+    O -- UC_ManageColloc
+
+    ' Member Associations
+    M -- UC_Join
+    M -- UC_ViewMembers
+    M -- UC_AddExpense
+    M -- UC_MarkPayment
+    M -- UC_ViewBalance
+    M -- UC_WhoOwesWho
+    M -- UC_Quit
+
+    ' Admin Associations
+    A -- UC_Stats
+    A -- UC_ManageUsers
+
+    ' Includes (Authentication required)
+    UC_Profile ..> UC_Login : <<include>>
+    UC_ManageMembers ..> UC_Login : <<include>>
+    UC_ManageColloc ..> UC_Login : <<include>>
+    UC_Join ..> UC_Login : <<include>>
+    UC_ViewMembers ..> UC_Login : <<include>>
+    UC_AddExpense ..> UC_Login : <<include>>
+    UC_MarkPayment ..> UC_Login : <<include>>
+    UC_ViewBalance ..> UC_Login : <<include>>
+    UC_WhoOwesWho ..> UC_Login : <<include>>
+    UC_Quit ..> UC_Login : <<include>>
+    UC_Stats ..> UC_Login : <<include>>
+    UC_ManageUsers ..> UC_Login : <<include>>
+
+    ' Generalizations (Specialized actions)
+    UC_Invite --|> UC_ManageMembers
+    UC_RemoveMember --|> UC_ManageMembers
+    
+    UC_CreateColloc --|> UC_ManageColloc
+    UC_CancelColloc --|> UC_ManageColloc
+
+    UC_Ban --|> UC_ManageUsers
+    UC_Unban --|> UC_ManageUsers
+}
+
+@enduml

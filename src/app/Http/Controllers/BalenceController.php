@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Colocation;
 use App\Models\Expense;
-use App\Models\Payment;
+use App\Models\ExpenseDetail;
+use App\Models\ColocationMember;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -11,107 +13,45 @@ use Illuminate\Support\Facades\Auth;
 class BalenceController
 {
     /**
-     * Display a listing of the resource.
+     * Display a listing of the balances and suggested payments.
      */
-    public function index()
+    public function index($colocation_id)
     {
         $user = Auth::user();
-        $colocation = $user->currentColocation();
+        $colocation = Colocation::find($colocation_id);
 
         if (!$colocation) {
-            return redirect()->route('dashboard')->with('error', 'Vous n\'avez pas de colocation active.');
+            return redirect()->route('user.dashboard')->with('error', 'Colocation introuvable.');
         }
 
-        // 1. On ne récupère QUE les membres ACTIFS pour le calcul des parts
-        // On utilise la relation activeMembers ou on filtre manuellement
         $members = $colocation->members()->wherePivotNull('left_at')->get();
-
-        // On s'assure que l'Owner est dans la liste (même s'il n'est pas dans le pivot)
         $owner = User::find($colocation->owner_id);
-        if (!$members->contains($owner)) {
+
+        if ($owner && !$members->contains($owner)) {
             $members->push($owner);
         }
 
-        // 2. Calcul de la Part Équitable pour les membres actuels
-        $totalExpenses = Expense::where('colocation_id', $colocation->id)->sum('amount');
-        $memberCount = $members->count();
-
-        // IMPORTANT : La part individuelle est basée sur le nombre de personnes qui vont payer MAINTENANT
-        $sharePerPerson = $memberCount > 0 ? $totalExpenses / $memberCount : 0;
-
         $balances = [];
         foreach ($members as $member) {
-            // On prend TOUTES les dépenses et paiements de l'histoire, 
-            // car la dette du membre parti a été transférée à l'Owner via la table Payment
-            $paidExpenses = Expense::where('colocation_id', $colocation->id)
-                ->where('payer_id', $member->id)
-                ->sum('amount');
-
-            $sentPayments = Payment::where('colocation_id', $colocation->id)
-                ->where('payer_id', $member->id)
-                ->sum('amount');
-
-            $receivedPayments = Payment::where('colocation_id', $colocation->id)
-                ->where('receiver_id', $member->id)
-                ->sum('amount');
-
-            // Formule de balance nette
-            $netBalance = ($paidExpenses - $sharePerPerson) + $sentPayments - $receivedPayments;
-
             $balances[$member->id] = [
                 'user' => $member,
-                'balance' => round($netBalance, 2)
+                'balance' => $member->getColocationBalance($colocation->id)
             ];
         }
 
-        // 3. Algorithme "Qui doit à qui"
-        $debtors = array_filter($balances, fn($b) => $b['balance'] < -0.01);
-        $creditors = array_filter($balances, fn($b) => $b['balance'] > 0.01);
+        $suggestedPayments = $this->calculateSuggestedPayments($balances);
 
-        usort($debtors, fn($a, $b) => $a['balance'] <=> $b['balance']);
-        usort($creditors, fn($a, $b) => $b['balance'] <=> $a['balance']);
+        $pastPayments = ExpenseDetail::whereHas('colocationMember', function ($query) use ($colocation) {
+            $query->where('colocation_id', $colocation->id);
+        })
+            ->where('status', 'paid')
+            ->latest('updated_at')
+            ->get();
 
-        $suggestedPayments = [];
-        $debtorsList = array_values($debtors);
-        $creditorsList = array_values($creditors);
-        $i = $j = 0;
-
-        while ($i < count($debtorsList) && $j < count($creditorsList)) {
-            $amount = min(abs($debtorsList[$i]['balance']), $creditorsList[$j]['balance']);
-            if ($amount > 0.01) {
-                $suggestedPayments[] = [
-                    'from' => $debtorsList[$i]['user'],
-                    'to' => $creditorsList[$j]['user'],
-                    'amount' => round($amount, 2)
-                ];
-            }
-            $debtorsList[$i]['balance'] += $amount;
-            $creditorsList[$j]['balance'] -= $amount;
-            if (abs($debtorsList[$i]['balance']) < 0.01)
-                $i++;
-            if ($creditorsList[$j]['balance'] < 0.01)
-                $j++;
-        }
-
-        $pastPayments = Payment::where('colocation_id', $colocation->id)->orderBy('created_at', 'desc')->get();
-
-        return view('pages.balences.index', compact('balances', 'suggestedPayments', 'pastPayments', 'members'));
+        return view('pages.balences.index', compact('colocation', 'balances', 'suggestedPayments', 'pastPayments', 'members'));
     }
 
-
-
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-    //
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
+    public function store(Request $request, $colocation_id)
     {
         $request->validate([
             'receiver_id' => 'required|exists:users,id',
@@ -122,47 +62,76 @@ class BalenceController
             return redirect()->back()->with('error', 'You cannot pay yourself!');
         }
 
-        $colocation = Auth::user()->currentColocation();
+        $colocation = Colocation::find($colocation_id);
+        if (!$colocation || $colocation->status === 'desactive') {
+            return redirect()->back()->with('error', 'Vous ne pouvez pas effectuer de remboursements dans une colocation annulée.');
+        }
 
-        Payment::create([
-            'colocation_id' => $colocation->id,
-            'payer_id' => Auth::id(),
-            'receiver_id' => $request->receiver_id,
-            'amount' => $request->amount,
-        ]);
+        $myMemberId = ColocationMember::where('colocation_id', $colocation->id)->where('user_id', Auth::id())->value('id');
+        $receiverMemberId = ColocationMember::where('colocation_id', $colocation->id)->where('user_id', $request->receiver_id)->value('id');
 
-        return redirect()->route('balances.index')->with('success', 'Reimbursement recorded successfully! Balances have been updated.');
+        $detailsToPay = ExpenseDetail::where('colocation_member_id', $myMemberId)
+            ->where('status', 'pending')
+            ->whereHas('expense', function ($query) use ($receiverMemberId) {
+            $query->where('colocation_member_id', $receiverMemberId);
+        })
+            ->get();
+
+        $remainingToPay = $request->amount;
+
+        foreach ($detailsToPay as $detail) {
+            if ($remainingToPay >= $detail->amount - 0.01) {
+                $detail->status = 'paid';
+                $detail->save();
+                $remainingToPay -= $detail->amount;
+            }
+            elseif ($remainingToPay > 0) {
+                $detail->status = 'paid';
+                $detail->save();
+                $remainingToPay = 0;
+            }
+        }
+
+        return redirect()->route('balances.index', $colocation_id)->with('success', 'Reimbursement recorded successfully! Balances have been updated.');
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
+    private function calculateSuggestedPayments(array $balances): array
     {
-    //
+        $suggestedPayments = [];
+
+        $debtors = [];
+        $creditors = [];
+
+        foreach ($balances as $b) {
+            if ($b['balance'] < -0.01) {
+                $debtors[] = $b;
+            }
+            elseif ($b['balance'] > 0.01) {
+                $creditors[] = $b;
+            }
+        }
+
+        foreach ($debtors as &$debtor) {
+            foreach ($creditors as &$creditor) {
+                if ($debtor['balance'] < -0.01 && $creditor['balance'] > 0.01) {
+                    $amount = min(abs($debtor['balance']), $creditor['balance']);
+
+                    if ($amount > 0.01) {
+                        $suggestedPayments[] = [
+                            'from' => $debtor['user'],
+                            'to' => $creditor['user'],
+                            'amount' => round($amount, 2)
+                        ];
+
+                        $debtor['balance'] += $amount;
+                        $creditor['balance'] -= $amount;
+                    }
+                }
+            }
+        }
+
+        return $suggestedPayments;
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
-    {
-    //
-    }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
-    {
-    //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
-    {
-    //
-    }
 }

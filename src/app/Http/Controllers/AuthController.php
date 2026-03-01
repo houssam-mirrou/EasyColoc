@@ -51,11 +51,11 @@ class AuthController
         $is_first_user = User::count();
 
         if ($is_first_user === 0) {
+            $validated['role'] = 'admin';
             $user = User::create($validated);
-            $user->role = 'admin';
-            $user->save();
         }
         else {
+            $validated['role'] = 'user';
             $user = User::create($validated);
         }
 

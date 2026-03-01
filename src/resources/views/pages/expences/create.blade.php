@@ -6,10 +6,10 @@
 <div class="max-w-2xl mx-auto mt-6 px-4 pb-12">
 
     <div class="mb-8">
-        <a href="{{ route('user.dashboard') }}"
+        <a href="{{ route('colocations.show', request()->route('colocation') ?? '') }}"
             class="inline-flex items-center gap-2 text-sm font-bold text-gray-500 hover:text-blue-600 transition-colors bg-white px-4 py-2 rounded-xl border border-gray-200 shadow-sm hover:shadow-md mb-6">
             <i class="ph-bold ph-arrow-left text-lg"></i>
-            Retour au tableau de bord
+            Retour à la colocation
         </a>
         <div class="flex items-center gap-3">
             <div
@@ -24,7 +24,8 @@
     </div>
 
     <div class="bg-white p-6 sm:p-8 rounded-2xl shadow-[0_2px_10px_rgb(0,0,0,0.02)] border border-gray-100">
-        <form action="{{ route('expenses.store') }}" method="POST" class="space-y-6">
+        <form action="{{ route('expenses.store', request()->route('colocation') ?? '') }}" method="POST"
+            class="space-y-6">
             @csrf
 
             <div>
@@ -45,43 +46,22 @@
                 @enderror
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                    <label for="amount" class="block mb-2 text-sm font-semibold text-gray-700">Montant (MAD)</label>
-                    <div class="relative">
-                        <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
-                            <i class="ph ph-coins text-gray-400 text-lg"></i>
-                        </div>
-                        <input type="number" step="0.01" min="0.1" name="amount" id="amount" value="{{ old('amount') }}"
-                            placeholder="0.00"
-                            class="w-full pl-11 border border-gray-200 rounded-xl p-3 text-gray-900 bg-gray-50 focus:bg-white focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all duration-200"
-                            required>
+            <div>
+                <label for="amount" class="block mb-2 text-sm font-semibold text-gray-700">Montant (MAD)</label>
+                <div class="relative">
+                    <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
+                        <i class="ph ph-coins text-gray-400 text-lg"></i>
                     </div>
-                    @error('amount')
-                    <span class="flex items-center gap-1 text-red-500 text-sm mt-1.5 font-medium">
-                        <i class="ph-fill ph-warning-circle"></i> {{ $message }}
-                    </span>
-                    @enderror
+                    <input type="number" step="0.01" min="0.1" name="amount" id="amount" value="{{ old('amount') }}"
+                        placeholder="0.00"
+                        class="w-full pl-11 border border-gray-200 rounded-xl p-3 text-gray-900 bg-gray-50 focus:bg-white focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all duration-200"
+                        required>
                 </div>
-
-                <div>
-                    <label for="expense_date" class="block mb-2 text-sm font-semibold text-gray-700">Date de
-                        l'achat</label>
-                    <div class="relative">
-                        <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
-                            <i class="ph ph-calendar-blank text-gray-400 text-lg"></i>
-                        </div>
-                        <input type="date" name="expense_date" id="expense_date"
-                            value="{{ old('expense_date', date('Y-m-d')) }}"
-                            class="w-full pl-11 border border-gray-200 rounded-xl p-3 text-gray-900 bg-gray-50 focus:bg-white focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all duration-200"
-                            required>
-                    </div>
-                    @error('expense_date')
-                    <span class="flex items-center gap-1 text-red-500 text-sm mt-1.5 font-medium">
-                        <i class="ph-fill ph-warning-circle"></i> {{ $message }}
-                    </span>
-                    @enderror
-                </div>
+                @error('amount')
+                <span class="flex items-center gap-1 text-red-500 text-sm mt-1.5 font-medium">
+                    <i class="ph-fill ph-warning-circle"></i> {{ $message }}
+                </span>
+                @enderror
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -143,7 +123,7 @@
             </div>
 
             <div class="flex gap-3 pt-6 mt-4 border-t border-gray-100">
-                <a href="{{ route('user.dashboard') }}"
+                <a href="{{ route('colocations.show', request()->route('colocation') ?? '') }}"
                     class="w-1/3 flex items-center justify-center bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold p-3.5 rounded-xl transition-colors">
                     Annuler
                 </a>

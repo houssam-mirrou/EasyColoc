@@ -10,13 +10,12 @@ return new class extends Migration {
      */
     public function up(): void
     {
-        Schema::create('payments', function (Blueprint $table) {
+        Schema::create('colocation_members', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('user_id')->constrained()->onDelete('cascade');
             $table->foreignId('colocation_id')->constrained()->onDelete('cascade');
-            $table->foreignId('payer_id')->constrained('users')->onDelete('cascade'); // Celui qui rembourse sa dette
-            $table->foreignId('receiver_id')->constrained('users')->onDelete('cascade'); // Celui qui reçoit l'argent
-
-            $table->decimal('amount', 10, 2);
+            $table->enum('role', ['owner', 'member'])->default('member');
+            $table->timestamp('left_at')->nullable();
             $table->timestamps();
         });
     }
@@ -26,6 +25,6 @@ return new class extends Migration {
      */
     public function down(): void
     {
-        Schema::dropIfExists('payments');
+        Schema::dropIfExists('colocation_members');
     }
 };

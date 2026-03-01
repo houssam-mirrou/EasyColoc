@@ -10,12 +10,6 @@
 
     <div class="flex-1 px-4 py-6 space-y-1.5 overflow-y-auto">
 
-        <p class="px-3 text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Navigation</p>
-        <a href="{{ Auth::check() ? (Auth::user()->role === 'admin' ? route('admin.dashboard') : route('user.dashboard')) : url('/') }}"
-            class="flex items-center gap-3 px-3 py-2.5 rounded-xl font-semibold text-gray-600 hover:text-blue-600 hover:bg-blue-50 transition-colors mb-4">
-            <i class="ph ph-house text-xl"></i> Accueil
-        </a>
-
         @guest
         <p class="px-3 text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Accès</p>
         <a href="{{ url('/login') }}"

@@ -16,6 +16,14 @@
             <p class="text-sm text-gray-500 font-medium mt-1">Content de vous revoir sur EasyColoc 👋</p>
         </div>
 
+        @if(session('error'))
+        <div
+            class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl shadow-sm mb-6 flex items-center gap-3">
+            <i class="ph-fill ph-warning-circle text-xl text-red-500"></i>
+            <p class="font-medium text-sm">{{ session('error') }}</p>
+        </div>
+        @endif
+
         <form action="{{ route('login.handle') }}" method="POST" class="space-y-6">
             @csrf
 
@@ -25,10 +33,15 @@
                     <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
                         <i class="ph ph-envelope-simple text-gray-400 text-lg"></i>
                     </div>
-                    <input type="email" name="email" placeholder="vous@exemple.com"
+                    <input type="email" name="email" value="{{ old('email') }}" placeholder="vous@exemple.com"
                         class="w-full pl-11 border border-gray-200 rounded-xl p-3 text-gray-900 bg-gray-50 focus:bg-white focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all duration-200"
                         required>
                 </div>
+                @error('email')
+                <span class="flex items-center gap-1 text-red-500 text-sm mt-1.5 font-medium">
+                    <i class="ph-fill ph-warning-circle"></i> {{ $message }}
+                </span>
+                @enderror
             </div>
 
             <div>
@@ -41,6 +54,11 @@
                         class="w-full pl-11 border border-gray-200 rounded-xl p-3 text-gray-900 bg-gray-50 focus:bg-white focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all duration-200"
                         required>
                 </div>
+                @error('password')
+                <span class="flex items-center gap-1 text-red-500 text-sm mt-1.5 font-medium">
+                    <i class="ph-fill ph-warning-circle"></i> {{ $message }}
+                </span>
+                @enderror
             </div>
 
             <button type="submit"

@@ -193,7 +193,7 @@
                         Le
                         groupe sera dissous et toutes les dettes seront archivées.</p>
 
-                    @if(Auth::user()->hasDebt())
+                    @if(Auth::user()->hasDebt($colocation->id))
                     <div class="bg-red-100 border border-red-300 p-3 rounded-xl flex items-start gap-2">
                         <i class="ph-fill ph-warning-circle text-lg text-red-600 mt-0.5"></i>
                         <p class="text-sm text-red-800 font-bold">Action impossible : Vous devez payer votre dette avant
@@ -206,8 +206,9 @@
                     onsubmit="return confirm('Êtes-vous absolument sûr de vouloir annuler cette colocation ? Cette action est définitive.');"
                     class="w-full sm:w-auto shrink-0">
                     @csrf
-                    <button type="submit" @if(Auth::user()->hasDebt()) disabled @endif
-                        class="w-full sm:w-auto flex items-center justify-center gap-2 {{ Auth::user()->hasDebt() ?
+                    <button type="submit" @if(Auth::user()->hasDebt($colocation->id)) disabled @endif
+                        class="w-full sm:w-auto flex items-center justify-center gap-2 {{
+                        Auth::user()->hasDebt($colocation->id) ?
                         'bg-gray-400 cursor-not-allowed border-gray-400' : 'bg-red-600 hover:bg-red-700 border-red-700'
                         }} text-white font-bold py-3 px-6 rounded-xl shadow-sm hover:shadow-md transition-all border">
                         <i class="ph-bold ph-trash-simple"></i> Annuler la Colocation

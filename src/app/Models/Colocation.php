@@ -8,30 +8,29 @@ class Colocation extends Model
 {
     protected $fillable = [
         'name',
-        'owner_id',
+        'description',
         'status',
-        'cancelled_at',
     ];
 
 
-    public function owner()
+    public function colocationMembers()
     {
-        return $this->belongsTo(User::class , 'owner_id');
+        return $this->hasMany(ColocationMember::class);
     }
 
     public function members()
     {
-        return $this->belongsToMany(User::class)->withPivot('left_at')->withTimestamps();
+        return $this->belongsToMany(User::class , 'colocation_members')->withPivot('role', 'left_at')->withTimestamps();
     }
 
     public function activeMembers()
     {
-        return $this->members()->whereNull('left_at');
+        return $this->members()->wherePivotNull('left_at');
     }
 
     public function expenses()
     {
-        return $this->hasMany(Expense::class , 'colocation_id');
+        return $this->hasManyThrough(Expense::class , ColocationMember::class);
     }
 
     public function categories()
@@ -43,5 +42,4 @@ class Colocation extends Model
     {
         return $this->hasMany(Invitation::class , 'colocation_id');
     }
-
 }

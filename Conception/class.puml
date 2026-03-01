@@ -1,0 +1,99 @@
+@startuml
+skinparam classAttributeIconSize 0
+skinparam monochrome true
+skinparam shadowing false
+
+class User {
+    - id : int
+    - name : string
+    - email : string
+    - password : string
+    - role : enum
+    - reputation_score : int
+    - is_banned : boolean
+}
+
+class Admin {
+}
+
+class Member {
+}
+
+class Owner {
+}
+
+class Collocation {
+    - id : int
+    - name : string
+    - status : enum
+    - cancelled_at : datetime
+}
+
+class Membership {
+    - id : int
+    - joined_at : datetime
+    - left_at : datetime
+}
+
+class Invitation {
+    - id : int
+    - token : string
+    - status : enum
+    - created_at : datetime
+}
+
+class Expense {
+    - id : int
+    - title : string
+    - amount : double
+    - expense_date : datetime
+    - payed : boolean
+}
+
+class Categorie {
+    - id : int
+    - name : string
+}
+
+class Payment {
+    - id : int
+    - amount : double
+    - paying_date : datetime
+}
+
+class ExpenseShare {
+    - id : int
+    - amount : double
+    - status : enum
+    - paying_date : datetime
+}
+
+class Transaction {
+    - id : int
+    - amount : double
+    - paying_date : datetime
+}
+
+' Inheritance
+User <|-- Admin
+User <|-- Member
+User <|-- Owner
+
+' Relationships
+Membership "0..*" -- "1" Member
+Membership "0..*" -- "1" Collocation
+
+Expense "1..*" -- "1" Membership : < lier à
+Expense "0..*" -- "1" Categorie
+
+Invitation "0..*" -- "1" Owner : envoyer <
+Invitation "1..*" -- "1" Member : recevoir >
+Invitation "0..*" -- "1" Collocation
+
+User "1..*" -- "1..*" User : effectuer / recevoir >
+(User, User) .. Payment
+
+Expense "1" -- "0..*" ExpenseShare
+ExpenseShare "1" -- "0..*" Transaction
+
+@enduml

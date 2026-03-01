@@ -19,6 +19,7 @@ return new class extends Migration {
             $table->enum('role', ['admin', 'user'])->default('user');
             $table->integer('reputation_score')->default(0);
             $table->boolean('is_banned')->default(false);
+            $table->enum('status', ['active', 'desactive'])->default('active');
             $table->rememberToken();
             $table->timestamps();
         });
