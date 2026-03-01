@@ -1,99 +1,97 @@
 @startuml
-skinparam classAttributeIconSize 0
-skinparam monochrome true
-skinparam shadowing false
 
-class User {
-    - id : int
-    - name : string
-    - email : string
-    - password : string
-    - role : enum
-    - reputation_score : int
-    - is_banned : boolean
-}
+    enum UserRole{
+        ADMIN,
+        USER,
+    }
 
-class Admin {
-}
+    enum UserStatus{
+        ACTIVE,
+        DESACTIVE,
+    }
 
-class Member {
-}
+    class User{
+        - name: string
+        - email: string
+        - password: string
+        - role: UserRole
+        - reputation: int
+        - is_banned: boolean
+        - status: UserStatus
+        - created_at: timestamp
+        - updated_at: timestamp
+    }
 
-class Owner {
-}
+    User -- UserRole
+    User -- UserStatus
 
-class Collocation {
-    - id : int
-    - name : string
-    - status : enum
-    - cancelled_at : datetime
-}
+    enum ColocationStatus{
+        ACTIVE,
+        DESACTIVE,
+    }
 
-class Membership {
-    - id : int
-    - joined_at : datetime
-    - left_at : datetime
-}
+    class Colocation{
+        - name: string
+        - description: text
+        - status: ColocationStatus
+        - created_at: timestamp
+        - updated_at: timestamp
+    }
 
-class Invitation {
-    - id : int
-    - token : string
-    - status : enum
-    - created_at : datetime
-}
+    Colocation -- ColocationStatus
 
-class Expense {
-    - id : int
-    - title : string
-    - amount : double
-    - expense_date : datetime
-    - payed : boolean
-}
+    enum ColocationMemberRole{
+        Owner,
+        Member,
+    }
 
-class Categorie {
-    - id : int
-    - name : string
-}
+    class ColocationMember{
+        - role: ColocationMemberRole
+        - left_at: timestamp
+        - created_at: timestamp
+        - updated_at: timestamp
+    }
 
-class Payment {
-    - id : int
-    - amount : double
-    - paying_date : datetime
-}
+    ColocationMember -- ColocationMemberRole
 
-class ExpenseShare {
-    - id : int
-    - amount : double
-    - status : enum
-    - paying_date : datetime
-}
+    class Category{
+        - name: string
+        - description: text
+        - created_at: timestamp
+        - updated_at: timestamp
+    }
 
-class Transaction {
-    - id : int
-    - amount : double
-    - paying_date : datetime
-}
+    class Expense{
+        - title: string 
+        - amount: float
+        - created_at: timestamp
+        - updated_at: timestamp
+    }
 
-' Inheritance
-User <|-- Admin
-User <|-- Member
-User <|-- Owner
+    enum ExpenseDetailStatus{
+        PAID,
+        PENDING,
+    }
 
-' Relationships
-Membership "0..*" -- "1" Member
-Membership "0..*" -- "1" Collocation
+    class ExpenseDetail{
+        - amount: float
+        - status: ExpenseDetailStatus
+    }
 
-Expense "1..*" -- "1" Membership : < lier à
-Expense "0..*" -- "1" Categorie
+    User "1" -- "0..*" ColocationMember
 
-Invitation "0..*" -- "1" Owner : envoyer <
-Invitation "1..*" -- "1" Member : recevoir >
-Invitation "0..*" -- "1" Collocation
+    ExpenseDetail -- ExpenseDetailStatus
 
-User "1..*" -- "1..*" User : effectuer / recevoir >
-(User, User) .. Payment
+    ColocationMember "1..*" -- "1" Colocation
 
-Expense "1" -- "0..*" ExpenseShare
-ExpenseShare "1" -- "0..*" Transaction
+    ColocationMember "1" -- "0..*" Expense
+
+    ColocationMember "1" -- "0..*" ExpenseDetail
+
+    Colocation "1" -- "0..*" Category
+
+    Expense "0..*" -- "1" Category
+
+    Expense "1" -- "0..*" ExpenseDetail
 
 @enduml

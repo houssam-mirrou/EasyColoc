@@ -1,96 +1,87 @@
 @startuml
 left to right direction
-skinparam packageStyle rectangle
-skinparam monochrome true
-skinparam shadowing false
 
-actor "User" as U
-actor "Owner" as O
-actor "Member" as M
-actor "Admin" as A
+' --- Actors ---
+actor User
+actor Admin
+actor Member
+actor Owner
 
-' Actor Inheritance
-O --|> U
-M --|> U
-A --|> U
+' --- Actor Inheritance ---
+User <|-- Admin
+User <|-- Member
+Member <|-- Owner
 
+' --- System Boundary ---
 rectangle "EasyColoc" {
+
     ' General Use Cases
-    usecase "Se connecter" as UC_Login
-    usecase "S'inscrire" as UC_Register
-    usecase "Gérer le profil" as UC_Profile
+    usecase "Register" as UC1
+    usecase "Login" as UC2
+    usecase "Logout" as UC3
+    usecase "Consult Statistics" as UC4
+    usecase "Ban/Unban User" as UC5
+    usecase "Activate/Deactivate User" as UC6
+    usecase "Create/Join Colocation" as UC7
 
-    ' Owner Specific
-    usecase "Gérer les membres" as UC_ManageMembers
-    usecase "Inviter des membres" as UC_Invite
-    usecase "Supprimer des membres" as UC_RemoveMember
-    
-    usecase "Gérer les collocations" as UC_ManageColloc
-    usecase "Créer une collocation" as UC_CreateColloc
-    usecase "Annuler une collocation" as UC_CancelColloc
+    ' Colocation Specific Use Cases
+    usecase "Create expense" as UC8
+    usecase "Mark expense as paid" as UC9
+    usecase "Invite users" as UC10
+    usecase "Remove user" as UC11
+    usecase "Manage colocation" as UC12
+    usecase "Add colocation" as UC13
+    usecase "Cancel colocation" as UC14
+    usecase "Delete colocation" as UC15
 
-    ' Member Specific
-    usecase "Rejoindre une collocation via une invitation" as UC_Join
-    usecase "Voir les membres, rôles et réputations" as UC_ViewMembers
-    usecase "Ajouter une dépense" as UC_AddExpense
-    usecase "Marquer un paiement" as UC_MarkPayment
-    usecase "Voir son solde" as UC_ViewBalance
-    usecase "Consulter 'qui doit à qui'" as UC_WhoOwesWho
-    usecase "Quitter une collocation" as UC_Quit
+    usecase "Manage categories" as UC16
+    usecase "Consult category" as UC17
+    usecase "Create category" as UC18
+    usecase "Update category" as UC19
+    usecase "Delete category" as UC20
 
-    ' Admin Specific
-    usecase "Voir les statistiques" as UC_Stats
-    usecase "Gérer les utilisateurs" as UC_ManageUsers
-    usecase "Bannir les utilisateurs" as UC_Ban
-    usecase "Débannir les utilisateurs" as UC_Unban
+    usecase "Accept/Decline invitation" as UC21
 
     ' --- Relationships ---
 
-    ' User Associations
-    U -- UC_Register
-    U -- UC_Login
-    U -- UC_Profile
+    ' User
+    User -- UC1
+    User -- UC7
 
-    ' Owner Associations
-    O -- UC_ManageMembers
-    O -- UC_ManageColloc
+    ' Admin
+    Admin -- UC4
+    Admin -- UC5
+    Admin -- UC6
 
-    ' Member Associations
-    M -- UC_Join
-    M -- UC_ViewMembers
-    M -- UC_AddExpense
-    M -- UC_MarkPayment
-    M -- UC_ViewBalance
-    M -- UC_WhoOwesWho
-    M -- UC_Quit
+    ' Member
+    Member -- UC8
+    Member -- UC9
+    Member -- UC21
 
-    ' Admin Associations
-    A -- UC_Stats
-    A -- UC_ManageUsers
+    ' Owner
+    Owner -- UC10
+    Owner -- UC11
+    Owner -- UC12
+    Owner -- UC16
 
-    ' Includes (Authentication required)
-    UC_Profile ..> UC_Login : <<include>>
-    UC_ManageMembers ..> UC_Login : <<include>>
-    UC_ManageColloc ..> UC_Login : <<include>>
-    UC_Join ..> UC_Login : <<include>>
-    UC_ViewMembers ..> UC_Login : <<include>>
-    UC_AddExpense ..> UC_Login : <<include>>
-    UC_MarkPayment ..> UC_Login : <<include>>
-    UC_ViewBalance ..> UC_Login : <<include>>
-    UC_WhoOwesWho ..> UC_Login : <<include>>
-    UC_Quit ..> UC_Login : <<include>>
-    UC_Stats ..> UC_Login : <<include>>
-    UC_ManageUsers ..> UC_Login : <<include>>
+    ' Use Case Generalizations
+    UC12 <|-- UC13
+    UC12 <|-- UC14
+    UC12 <|-- UC15
 
-    ' Generalizations (Specialized actions)
-    UC_Invite --|> UC_ManageMembers
-    UC_RemoveMember --|> UC_ManageMembers
-    
-    UC_CreateColloc --|> UC_ManageColloc
-    UC_CancelColloc --|> UC_ManageColloc
+    UC16 <|-- UC17
+    UC16 <|-- UC18
+    UC16 <|-- UC19
+    UC16 <|-- UC20
 
-    UC_Ban --|> UC_ManageUsers
-    UC_Unban --|> UC_ManageUsers
+    ' Includes and Extends
+    UC2 ...> UC1 : <<extend>>
+    UC3 ...> UC2 : <<extend>>
+
+    UC4 ...> UC2 : <<include>>
+    UC5 ...> UC2 : <<include>>
+    UC6 ...> UC2 : <<include>>
+    UC7 ...> UC2 : <<include>>
+
 }
-
 @enduml
